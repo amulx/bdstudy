@@ -1,0 +1,41 @@
+--bindir=/Data/apps/php718/bin/
+--sbindir=/Data/apps/php718/sin/
+--with-apxs2=/Data/apps/php718/bin/
+--enable-embed=shared
+--enable-fpm
+--with-fpm-user=amu
+--with-fpm-group=amu
+--with-fpm-systemd
+--with-fpm-acl
+--with-litespeed
+--enable-phpdbg
+--enable-phpdbg-webhelper
+--enable-phpdbg-debug
+--enable-cgi
+--enable-ipv6
+--enable-libxml
+--with-openssl
+--disable-fileinfo
+--with-mcrypt
+--with-mysqli
+--enable-embedded-mysqli
+--enable-pcntl
+--enable-pdo
+--enable-phar
+--enable-sockets
+--enable-sysvmsg
+--enable-zip
+--disable-inline-optimization
+
+yum install libxml2 libxml2-devel openssl openssl-devel bzip2 bzip2-devel libcurl libcurl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel gmp gmp-devel libmcrypt libmcrypt-devel readline readline-devel libxslt libxslt-devel
+
+
+export LD_LIBRARY_PATH=/usr/local/lib: LD_LIBRARY_PATH
+
+ln -s /usr/local/bin/libmcrypt_config /usr/bin/libmcrypt_config
+export LD_LIBPARY_PATH=/usr/local/lib:LD_LIBRARY_PATH
+
+
+collect2:eeor:ld returned 1 exit status
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/you/found/with/find
