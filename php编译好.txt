@@ -39,3 +39,5 @@ export LD_LIBPARY_PATH=/usr/local/lib:LD_LIBRARY_PATH
 collect2:eeor:ld returned 1 exit status
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/you/found/with/find
+
+php.ini≈‰÷√Œƒº˛ºÏ≤È https://github.com/sektioneins/pcc
