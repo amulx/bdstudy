@@ -1,0 +1,249 @@
+jq2.0开始不再支持IE6,7,8
+1、alert（‘hello’）;
+window.alert('1111');
+
+
+window和document
+window是什么
+1、浏览器打开的窗口
+2、打开网页是，浏览器会为
+
+self.parent来引用它的领导
+self.top 顶级领导
+
+
+document是什么
+1、受命于window
+
+alert(document.head);
+
+document.body
+
+document.title
+
+xxx.innerHTML
+
+document.title.innerHTML
+
+self.top.document.body
+
+三、外部引用js的两种手法
+脚本可以写在外部
+原因如下：
+1、封装，把一些通用的功能封装在一个脚本文件中，以备下次使用
+2、减轻客户端网页的网速压力
+3、编码规范
+
+<script src='js/my.js'></script>
+
+document.write
+向当前的html文档输入一段文字
+<script>document.write('你好')</script>
+
+<script>document.write('<script>alert("你好")<\/script>')</script>
+
+<script>document.write('<script src="js/my.js"><\/script>')</script>
+
+四、js中定义变量新理解
+function showMsg(abc){
+	alert(abc);
+}
+
+window["showMsg"]("你好")；
+
+五、JavaScript自定义函数的学问
+定义变量 var str = "你好";
+局部变量和全局变量  变量定义的先后问题
+
+六、js中对象的小清新理解
+str = new String("你好");
+str = new Number(3);
+在js中所有事物都是对象：字符串、数字、数组、日期等等
+
+str = "hello";
+alert(str.length);
+Null 就是null包含了一个空对象
+Undefined代表对象定义后没有被初始化
+
+me = new Object();
+me.name = "shenyi";
+me.age = 35;
+me.sex ="男";
+alert(me.name);
+
+me = {"name":"amu","age":18};
+window["me"].age
+
+
+七、你所不知道的if else
+
+a>1?alert('大'):alert("小");
+a>1?show():alert("小");
+function show(){
+	alert("大");
+}
+
+
+a>1?(b>1?show():alert("不大不小")):alert("小");
+a>1?(b>1?(c>1?show():alert("111111111")):alert("不大不小")):alert("小")；
+
+八、也许你没见过的js循环写法
+1、for循环
+2、for in循环
+3、while
+4、do while
+str = "祝大家新年快乐";
+for(index=0;index<str.length;index=index+1){
+	alert(str[index]);
+}
+
+for(index=0,j = 3;index<str.length;index++,j++){
+	alert(str[index]);
+}
+
+
+index = 0;
+j=0;
+while(index<str.length,j<4){
+	alert(str[index]);
+	index++;
+	j++;
+}
+
+while(这里可以写多个条件语句，用逗号分割，只有最后一个为true，则前面无论几个false都会判定为true)
+
+
+function bbb(){
+	if(j<4){
+		return true;
+	}else{
+		return false;
+	}
+}
+str = "祝大家新年快乐";
+index = 0;
+j=0;
+while(index<str.length,bbb()){
+	alert(str[index]);
+	index++;
+	j++;
+}
+
+
+九、js中对象的小清新理解2
+me = {"name":"amu","age":18};
+alert(me.name);
+
+me = {"name":"amu","age":18,"showName":function(){alert(this.name)}}
+
+me = {"name":"amu","age":18,"showName":function(a){alert(a)}}
+me.showName("123");
+
+me = function(){}
+
+function me(){
+	this.name = "amu";
+	this.age = 18;
+	this.showName=function(){alert(this.name);}
+}
+alert(me.name);
+m = new me();
+alert(m.name);
+alert(m.showName());
+alert(window["m"]["name"]);
+window["m"]["name"]();
+
+function me(){
+	this.boss = {"name":"老板的名字"}
+}
+me.boss.name
+
+十、各种事件（一）：onXX事件
+<input type="button" value="我是一个按钮" id="mybtn">
+document.getElementById("xx");
+返回id属性是xx的一个元素
+
+document.getElementByName("xxx");
+window["mybtn"].value
+
+<input type="button" value="我是一个按钮" id="mybtn" onclick="alert(this.value)">
+<input type="button" value="我是一个按钮" id="mybtn" onclick="show(this)">
+function show(a){
+	alert("hello world");alert(a.value);
+}
+
+var btn = document.getElementById("mybtn");
+btn.onclick = function(){
+	alert(this.value);
+}
+
+window["id"]
+
+十一、奇妙的button
+1、<input type="button" value="我是一个按钮1" id="mybtn1" style="color:red;">
+<input type="submit" value="我是一个按钮1" id="mybtn1">
+<button><font style="color:red;">我是一个按钮2</font></button>
+
+<button id="mybtn2">我是一个按钮2<script>alert(2)</script></button>
+
+
+<button id="mybtn2" value="你好">我是一个按钮2<input type="button" value="我是一个按钮3" id="mybtn3"></button>
+<script>
+	mybtn1 = document.getElementById("mybtn1");
+	mybtn1.onclick = function(){
+		alert("你好")
+	}
+
+	mybtn2 = document.getElementById("mybtn2");
+	alert(mybtn2.innerHTML);
+	mybtn2.onclick = mybtn1.onclick;
+</script>
+
+<button id="mybtn4" type="button">我是一个按钮4</button>
+
+十二、js操作诡异的文本框（text）
+
+<input type="text" id="mytxt" name="" value="你好">
+
+mytxt = document.getElementById("mytxt");
+mytxt.onkeydown = function(){
+	alert(event.keyCode);
+	if(event.keyCode == 13){
+		alert("回车键");
+	}
+}
+
+<input type="button" id="cmd1" value="按钮">
+window["cmd"].onclick = function(){
+	alert(event.offsetx);
+}
+
+mytxt.onkeydown = function(e){
+	b = a || event;//当b不存在时，将event赋值给b
+	alert(b.keyCode);
+}
+
+
+十三、js操作超级链接的常见知识
+<a href="http://www.baidu.com">我是一个超级链接</a>
+
+<a href=''>我是一个超级链接</a>
+
+<a href='#' onclick="alert(123)">我是一个超级链接</a>
+<a href='www.baidu.com' onclick="alert(123)">我是一个超级链接</a>
+<a href='javascript:alert("123")' id="mylink" onclick="alert(123)">我是一个超级链接</a>
+var link = document.getElementById("mylink");
+link.innerHTML
+
+<a href='#' onclick="alert(123);return false;">我是一个超级链接</a>
+<input type="button" value="按钮" id="mybtn" onclick="alert('你好，我是一个按钮')"/>
+
+document.getElementById("mybtn").click();//自动触发点击事件
+
+十四、js操作容器的常见知识 div
+
+
+
+
+
+
