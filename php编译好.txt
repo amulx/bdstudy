@@ -1,3 +1,4 @@
+一、编译参数
 --bindir=/Data/apps/php718/bin/
 --sbindir=/Data/apps/php718/sin/
 --with-apxs2=/Data/apps/php718/bin/
@@ -26,10 +27,86 @@
 --enable-sysvmsg
 --enable-zip
 --disable-inline-optimization
+=========================================================================================
+./configure \
+--prefix=/usr/local/php \
+--with-config-file-path=/etc \
+--enable-fpm \
+--with-fpm-user=nginx  \
+--with-fpm-group=nginx \
+--enable-inline-optimization \
+--disable-debug \
+--disable-rpath \
+--enable-shared  \
+--enable-soap \
+--with-libxml-dir \
+--with-xmlrpc \
+--with-openssl \
+--with-mcrypt \
+--with-mhash \
+--with-pcre-regex \
+--with-sqlite3 \
+--with-zlib \
+--enable-bcmath \
+--with-iconv \
+--with-bz2 \
+--enable-calendar \
+--with-curl \
+--with-cdb \
+--enable-dom \
+--enable-exif \
+--enable-fileinfo \
+--enable-filter \
+--with-pcre-dir \
+--enable-ftp \
+--with-gd \
+--with-openssl-dir \
+--with-jpeg-dir \
+--with-png-dir \
+--with-zlib-dir  \
+--with-freetype-dir \
+--enable-gd-native-ttf \
+--enable-gd-jis-conv \
+--with-gettext \
+--with-gmp \
+--with-mhash \
+--enable-json \
+--enable-mbstring \
+--enable-mbregex \
+--enable-mbregex-backtrack \
+--with-libmbfl \
+--with-onig \
+--enable-pdo \
+--with-mysqli=mysqlnd \
+--with-pdo-mysql=mysqlnd \
+--with-zlib-dir \
+--with-pdo-sqlite \
+--with-readline \
+--enable-session \
+--enable-shmop \
+--enable-simplexml \
+--enable-sockets  \
+--enable-sysvmsg \
+--enable-sysvsem \
+--enable-sysvshm \
+--enable-wddx \
+--with-libxml-dir \
+--with-xsl \
+--enable-zip \
+--enable-mysqlnd-compression-support \
+--with-pear \
+--enable-opcache
+
+
+
+二、安装扩展库
+yum install libxml2 libxml2-devel openssl openssl-devel bzip2 bzip2-devel libcurl libcurl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel gmp gmp-devel libmcrypt libmcrypt-devel readline readline-devel libxslt libxslt-devel
+
 
 yum install libxml2 libxml2-devel openssl openssl-devel bzip2 bzip2-devel libcurl libcurl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel gmp gmp-devel libmcrypt libmcrypt-devel readline readline-devel libxslt libxslt-devel
 
 
+三、常见编译错误解决方法
 export LD_LIBRARY_PATH=/usr/local/lib: LD_LIBRARY_PATH
 
 ln -s /usr/local/bin/libmcrypt_config /usr/bin/libmcrypt_config
@@ -41,3 +118,13 @@ collect2:eeor:ld returned 1 exit status
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/you/found/with/find
 
 php.ini配置文件检查 https://github.com/sektioneins/pcc
+
+
+
+四、追加环境变量
+vi /etc/profile
+	在末尾追加
+		PATH=$PATH:/usr/local/php/bin
+		export PATH
+	执行命令使得改动立即生效
+		source /etc/profile

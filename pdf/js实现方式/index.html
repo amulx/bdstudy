@@ -1,0 +1,46 @@
+    <script src="<?php echo Yii::app()->getTheme()->getBaseUrl() ?>/js/bd/html2canvas.min.js" type="text/javascript" charset="utf-8"></script>   
+    <script src="https://cdn.bootcss.com/jspdf/1.3.4/jspdf.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="<?php echo Yii::app()->getTheme()->getBaseUrl() ?>/js/bd/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    function getPrintHtml(){
+        var a = window.document.body;
+        html2canvas(window.document.body, {
+            onrendered: function(canvas) {
+                var imgData = canvas.toDataURL("image/jpeg");
+                // createPDFObject(imgData);
+                var canWidth = canvas.width;
+                var canHeight = canvas.height;
+                var dpiX = 96;
+                var dpiY = 96;
+                var doc = new jsPDF('', 'in',[(canWidth+10)/dpiX,(canHeight+10)/dpiY]);
+                doc.addImage(imgData, 'JPEG', 0, 0,0,0);
+                doc.save('test.pdf');
+            },
+            background : "#f7f7f7"    //设置PDF背景色（默认透明，实际显示为黑色）
+        });
+    }
+    function createPDFObject(imgData) {
+        var doc = new jsPDF('p', 'pt');
+        doc.addImage(imgData, 5, 5, 600, 300, 'img');
+        doc.save('test.pdf')
+    }
+</script>
+
+
+
+          html2canvas(document.body, {
+              onrendered:function(canvas) {
+
+                  //返回图片dataURL，参数：图片格式和清晰度(0-1)
+                  var pageData = canvas.toDataURL('image/jpeg', 1.0);
+
+                  //方向默认竖直，尺寸ponits，格式a4[595.28,841.89]
+                  var pdf = new jsPDF('', 'pt', 'a4');
+
+                  //addImage后两个参数控制添加图片的尺寸，此处将页面高度按照a4纸宽高比列进行压缩
+                  pdf.addImage(pageData, 'JPEG', 0, 0, 595.28, 592.28/canvas.width * canvas.height );
+
+                  pdf.save('stone.pdf');
+
+              }
+          })

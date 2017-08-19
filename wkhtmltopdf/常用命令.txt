@@ -1,0 +1,5 @@
+wkhtmltopdf toc http://qt-project.org/doc/qt-4.8/qstring.html qstring.pdf
+
+wkhtmltopdf --dump-outline toc.xml http://qt-project.org/doc/qt-4.8/qstring.html qstring.pdf
+
+wkhtmltopdf toc --xsl-style-sheet my.xsl http://qt-project.org/doc/qt-4.8/qstring.html qstring.pdf

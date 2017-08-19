@@ -1,0 +1,131 @@
+软件通常都是存放在存储库中，并通过包的形式进行分发。
+处理包的工作被称为包管理。包提供了操作系统的基本组件，以及共享的库、应用程序、服务和文档。
+
+
+操作系统	格式		工具
+Debian		.deb 		apt, apt-cache, apt-get, dpkg
+Ubuntu		.deb		apt, apt-cache, apt-get, dpkg
+CentOS		.rpm		yum
+Fedora		.rpm		dnf
+FreeBSD		Ports, .txz	make, pkg
+
+
+
+更新包列表
+
+系统				命令
+Debian / Ubuntu			sudo apt-get update   sudo apt update
+    
+CentOS				yum check-update
+Fedora				dnf check-update
+FreeBSD Packages		sudo pkg update
+FreeBSD Ports			sudo portsnap fetch update
+
+
+更新已安装的包
+
+系统   			命令                             说明
+
+Debian / Ubuntu        sudo apt-get upgrade		只更新已安装的包
+		       sudo apt-get dist-upgrade	可能会增加或删除包以满足新的依赖项
+		       sudo apt upgrade			和 apt-get upgrade 类似
+		       sudo apt full-upgrade		和 apt-get dist-upgrade 类似
+
+CentOS		       sudo yum update
+Fedora		       sudo dnf upgrade
+FreeBSD Packages       sudo pkg upgrade
+
+
+搜索某个包
+系统	  		命令				说明
+Debian/Ubuntu		apt-cache search search_string	
+			apt search search_string	
+CentOS			yum search search_string	
+			yum search all search_string	搜索所有的字段，包括描述
+Fedora	        	dnf search search_string	
+			dnf search all search_string	搜索所有的字段，包括描述
+FreeBSD Packages	pkg search search_string	通过名字进行搜索
+			pkg search -f search_string	通过名字进行搜索并返回完整的描述
+			pkg search -D search_string	搜索描述
+FreeBSD Ports		cd /usr/ports && make search name=package	通过名字进行搜索
+			cd /usr/ports && make search key=search_string	搜索评论、描述和依赖
+
+
+
+查看某个软件包的信息
+系统			命令			说明
+Debian/Ubuntu		apt-cache show package	显示有关包的本地缓存信息
+			apt show package	
+			dpkg -s package		显示包的当前安装状态
+CentOS			yum info package	
+			yum deplist package	列出包的依赖
+Fedora			dnf info package	
+			dnf repoquery --requires package	列出包的依赖
+FreeBSD Packages	pkg info package	显示已安装的包的信息
+FreeBSD Ports		cd /usr/ports/category/port && cat pkg-descr	
+
+
+
+
+
+从存储库安装包
+
+系统			命令						说明
+Debian/Ubuntu		sudo apt-get install package	
+			sudo apt-get install package1 package2 ...	安装所有列出来的包
+			sudo apt-get install -y package			在 apt 提示是否继续的地方直接默认 yes
+			sudo apt install package			显示一个彩色的进度条
+CentOS			sudo yum install package	
+			sudo yum install package1 package2 ...		安装所有列出来的包
+			sudo yum install -y package			在 yum 提示是否继续的地方直接默认 yes
+Fedora	s		udo dnf install package	
+			sudo dnf install package1 package2 ...		安装所有列出来的包
+			sudo dnf install -y package			在 dnf 提示是否继续的地方直接默认 yes
+FreeBSD Packages	sudo pkg install package	
+			sudo pkg install package1 package2 ...		安装所有列出来的包
+FreeBSD Ports		cd /usr/ports/category/port && sudo make install	从源码构建安装一个 port
+
+
+
+
+
+从本地文件系统安装一个包
+对于一个给定的操作系统，有时有些软件官方并没有提供相应的包，那么开发人员或供应商将需要提供包文件的下载。你通常可以通过 web 浏览器检索这些包，或者通过命令行 curl 来检索这些信息。将包下载到目标系统后，我们通常可以通过单个命令来安装它。
+在 Debian 派生的系统上，dpkg 用来处理单个的包文件。如果一个包有未满足的依赖项，那么我们可以使用 gdebi 从官方存储库中检索它们。
+
+在 CentOS 和 Fedora 系统上，yum 和 dnf 用于安装单个的文件，并且会处理需要的依赖
+
+
+系统				命令			说明
+Debian/Ubuntu		sudo dpkg -i package.deb	
+			sudo apt-get install -y gdebi && sudo gdebi package.deb	安装 gdebi，然后使用 gdebi 安装 package.deb并处理缺失的依赖
+CentOS			sudo yum install package.rpm	
+Fedora			sudo dnf install package.rpm	
+FreeBSD Packages	sudo pkg add package.txz	
+			sudo pkg add -f package.txz	即使已经安装的包也会重新安装
+
+
+
+删除一个或多个已安装的包
+由于包管理器知道给定的软件包提供了哪些文件，因此如果某个软件不再需要了，它通常可以干净利落地从系统中清除这些文件。
+系统			命令				说明
+Debian/Ubuntu		sudo apt-get remove package	
+			sudo apt remove package	
+			sudo apt-get autoremove		删除不需要的包
+CentOS			sudo yum remove package	
+Fedora			sudo dnf erase package	
+FreeBSD Packages	sudo pkg delete package	
+			sudo pkg autoremove		删除不需要的包
+FreeBSD Ports		sudo pkg delete package	
+			cd /usr/ports/path_to_port && make deinstall	卸载 port
+
+
+apt 命令
+Debian 家族发行版的管理员通常熟悉 apt-get 和 apt-cache。较少为人所知的是简化的 apt 接口，它是专为交互式使用而设计的。
+传统命令			等价的 apt 命令
+apt-get update			apt update
+apt-get dist-upgrade		apt full-upgrade
+apt-cache search string		apt search string
+apt-get install package		apt install package
+apt-get remove package		apt remove package
+apt-get purge package		apt purge package
