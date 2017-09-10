@@ -1,0 +1,28 @@
+cat /etc/passwd | cut -d: -f1
+cat /etc/passwd | cut -d: -f2
+
+cat /etc/passwd |awk -F: '{print $1 "=>" $3}'
+
+cat /etc/passwd | head -5  //前五行
+
+cat /etc/passwd | head -5 | awk -F: '{print $1,$3}'	//-F 以什么来分割   默认以空格进行分割
+
+df | awk '{if(NR==3){print $1}}'
+
+df | awk '{if(NR==3){print int($4)}}'	//转整型
+
+df |awk 'END{print NF}'	//总共多少列
+df | awk 'END{print NR}'	//总共多少行
+
+
+
+awk '{print $0}' access.log //查找出file文件中的每一列
+
+awk '{print $1 "\t" $7}' access.log	//查找出file文件中的第1列和第7列
+
+cat file | awk '$0  !~/192.168.10.2/'|grep "php"|wc -l  //~匹配192.168.10.2的ip地址的统计，!~为不匹配
+
+
+
+
+
