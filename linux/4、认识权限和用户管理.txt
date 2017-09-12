@@ -1,0 +1,53 @@
+head -1 /etc/passwd
+head -1 /etc/group
+head -1 /etc/shadow  //密码
+
+####shell文件权限和脚本执行
+	r 读  w 写  x执行
+	-rwxr-xr-x. 1 root root     4587 8月  12 23:20 phpize
+	所有者  所属组  其他用户
+
+
+	所有者（u）
+	所属组（g）
+	其他用户（o）
+		passwd user1	//修改密码
+
+	1、用户的管理
+		用户的查看： id			or   id user1
+		用户的添加： useradd user1
+		用户的删除： userdel -r user1
+
+		普通用户的id一般从500开始
+
+
+	2、用户与组的关系
+		把用户加入组：gpasswd -a user1 root
+		把组中用户删除:gpasswd -d user1 root
+
+
+
+#####chmod权限分配
+	r 4
+	w 2
+	x 1	
+
+	chmod
+		chmod 755 /mnt
+		chmod o+x /mnt		// o =>other 其他用户
+		chmod o-x /mnt
+		chmod g+w /mnt
+		chmod o+w,o+x root.txt
+		chmod a+w /mnt		//a =>all 代表所有用户
+
+	acl
+	权限细化需求：
+		user1 file rw
+		user2 file rx
+		user3 file wx
+		user4 file rwx
+
+		getfacl
+		setfacl
+
+	sudo
