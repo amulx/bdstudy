@@ -1,0 +1,25 @@
+Linux支持的压缩格式
+	*.z	compress程序压缩文件
+	*.gz	gzip程序压缩文件
+	*.bz2	bzip2压缩文件
+	*.tar   并未压缩
+	*.tar.gz  tar打包的档案  使用gzip压缩
+	*.tar.bz2  tar打包的档案  使用bz2压缩
+
+
+
+1、gzip
+	gzip --help
+	gzip -cdtv 文件名称
+		拓展名称
+
+		ls -a /usr/bin >list
+
+	gzip -c 将压缩的数据输出到屏幕上
+		-d 解压缩的参数
+		-t 进行文件的一致性校验看是否损坏
+		-V 显示和原文件相比的压缩比
+		-# 压缩等级 # 为1-9
+
+
+	

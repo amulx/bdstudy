@@ -1,0 +1,62 @@
+passwd root //修改root密码
+history -c //清除历史记录
+init 0	//重启
+
+=======================
+#!/bin/bash
+for i in a b c d e f
+do
+	echo $i
+done
+=======================
+
+chmod a+x for.sh
+
+ifconfig eth0 192.168.23.69
+
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+ifconfig eth0
+TAB键自动补全
+
+
+
+历史记录
+history
+!5
+yum -y install httpd*  //安装Apache
+service httpd start
+
+!vi 
+!ser
+
+
+####命令别名：
+df -Th
+top -H
+alias ddd='df -Th'
+unalias ddd
+alias
+~/.bashrc
+
+init 6	//服务器重启
+
+
+#####输出重定向
+ls / >> root.txt	//追加输入
+ifconfig eth0 > net.txt	//覆盖输入
+ifconfig eth0 2> net.txt	//错误重定向
+ifconfig eth0 2>> net.txt	//错误重定向
+ifconfig eth0 1>net.txt 	//正确重定向
+./red.sh &> net.txt //正确和错误一起输入文件
+
+bash red.sh 1> net.txt 2>&1  //错误的结果通过1的通过进入文件
+bash red.sh 1>> net.txt 2>&1  //错误的结果通过1的通过进入文件   追加
+
+#####管道操作符 |
+free -m
+free -m | grep -i mem	//i 忽略大小写
+
+free -m | grep -i mem | awk '{print $4}'
+free -m | grep -i mem | awk '{print "tot:"$4}'
+free -m | grep -i mem | awk '{print "tot:"$4"\nuse:"$3}'
+
