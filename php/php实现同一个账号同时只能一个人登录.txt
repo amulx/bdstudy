@@ -1,0 +1,47 @@
+以前考虑过这个问题，今天实现了一下，挺快的，从研究到开发完成差不多4个小时。有点类似QQ，二台电脑登录，一台会把另一台挤掉线，并提示其他地点登录信息。
+
+一，实现原理
+
+1,用户在电脑A登录,session信息存放在redis当中，并将session_id存到mysql数据库中。
+
+2,同一用户在电脑B登录，验证完用户名和密码后，将该用户信息从数据库读出，取得用户在电脑A登录的session_id，然后在到redis中验证session是否过期。
+
+3,如果过期，不用openfire推送提示信息。如果没有过期，php利用openfire推送消息后，在将redis中用户在电脑A中登录的session删除掉，删除后，在将用户在电脑B登录的个人信息放到session中，并将电脑B登录的session_id更新到数据库中，在这里一定要先发送推送，然后在清空session，不然用户在电脑A收不到xmpp发过来的消息。
+
+注意：
+
+openfire是java cms的一种，自身有数据库，您创建的用户表根openfire自带的用户表之间要建立某种联系（如:手机号，邮箱等），方便信息推送。
+
+同一session_id肯定是在相同媒介上登录的,这个时候，也不用更新数据库和推送消息
+
+下面简单说一下安装过程，以及要注意的地方。
+
+二,安装所用到的工具
+
+    # yum install php php-fpm nginx mysql mysql-server redis php-redis php-devel php-pdo php-mysql  
+
+修改session存储方式：
+查看复制打印?
+
+    # vim /etc/php-fpm.d/www.conf     
+      
+    ;php_value[session.save_handler] = files   //注释掉旧的  
+    ;php_value[session.save_path] = /var/lib/php/session  
+      
+    php_value[session.save_handler] = redis  //添加以下内容  
+    php_value[session.save_path] = "tcp://127.0.0.1:6379"  
+
+启动服务后，如果以下内容说明，session存redis成功了
+redis telnet查看session
+
+redis telnet查看session
+
+openfire下载地址：http://www.igniterealtime.org/downloads/
+查看复制打印?
+
+    # rpm -ivh ./*.rpm   //下载的是rpm安装包  
+
+openfire启动后，然后访问http://ip:9090,一步一步配置就成了，有一点要注意就是数据库的编码。
+
+关于redis的php操作和命令行操作，请参考：
+http://blog.51yip.com/php/1698.html

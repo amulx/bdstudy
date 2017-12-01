@@ -1,0 +1,12 @@
+一、通过ifconfig
+
+二、ping www.baidu.com
+
+三、linux下网卡的配置文件在/etc/sysconfig/network-scripts/
+
+四、nslookup www.baidu.com
+
+五、DNS配置文件  vim /etc/resolv.conf
+
+六、traceroute，来进行路由跟踪
+	traceroute www.baidu.com

@@ -1,0 +1,10 @@
+切换到php安装目录的bin目录下
+
+下面以安装xdebug为例：
+
+# sudo ./pecl search xdebug
+
+# sudo ./pecl install xdebug
+
+最后记得在php.ini里面追加
+	extension=xdebug.so

@@ -1,0 +1,252 @@
+一、对数据库的基本操作 
+show databases;                      //列出数据库
+use database_name;               //使用database_name数据库
+create database data_name;   //创建名为data_name的数据库
+drop database data_name;     //删除一个名为data_name的数据库：
+use dbname; status                 //查看数据库dbname的详细信息
+
+alter database db_name CHARACTER SET utf8;  //修改数据库编码
+
+show variables like '%dir%';    // 查看mysql相关存放目录
+
+ 
+
+二、对表的基本操作
+show tables //列出所有表
+
+创建一个名为tab_name的新表
+create table tab_name( 
+  id int(10) not null auto_increment primary key, 
+  name varchar(40), 
+  pwd varchar(40) 
+) charset=gb2312;
+
+eg: 
+
+CREATE TABLE `test` (
+
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+ 
+
+//id自增的时候从7开始（表示前面已经有6行数据了）
+
+eg:
+
+CREATE TABLE `test` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1
+
+drop table tab_name   //删除名为tab_name的数据表 
+describe tab_name     //显示名为tab_name的表的数据结构 
+show columns from tab_name   //同上 
+delete from tab_name;    //删除表所有数据，不会重置自增的ID
+TRUNCATE TABLE `db_name`.`tab_name`;    //截断表重置自增的id为0
+UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+
+ 例如：UPDATE `mydb`.`mytable` SET `myname` = 'xst' WHERE `id` = '3';
+
+INSERT INTO 表名称 VALUES (值1, 值2,....)
+
+(1)INSERT INTO table_name (列1, 列2,...) VALUES (值1, 值2,....)
+
+例如：INSERT INTO `mydb`.`mytable` (`id`,`name`) VALUES ('1','aa');
+
+(2) INSERT INTO table_name (列1, 列2,...) VALUES (值1, 值2,....) on duplicate key update field=values(field)；    //field是字段名称，如果插入是，主键已经重复，则更新给出字段。
+
+例如：insert into report.user_live (date,pid,osid,level) values('2017-07-26','3','0','2') on duplicate key update level = values(level);   //插入这行数字时，主键是(date,pid,osid)复合主键，并且该主键的数据已经存在且唯一，此时出入多一行数据，则键非主键level字段更新到对应的唯一主键对应的记录中。
+
+SHOW TABLE STATUS WHERE Name = 'table_name';    //查看表的详细信息：
+
+ 
+
+三、修改表结构
+ALTER TABLE tab_name ADD PRIMARY KEY (col_name);                      //设置主键
+col_name ALTER TABLE tab_name DROP PRIMARY KEY (col_name);   //删除主键
+Alter table tab_name add col_name varchar(20);   //新增字段
+alter table tab_name drop col_name;                    //删除字段
+
+alter table tab_name modify col_name varchar(40) not null;   //修改字段属性,若加上not null则要求原字段下没有数据  
+alter table tab_name rename to new_tab_name;      //修改表名
+alter table tab_name change old_col new_col varchar(40);     //修改字段名,必须为当前字段指定数据类型等属性，否则不能修改 
+create table new_tab_name like old_tab_name;     //用一个已存在的表来建新表，但不包含旧表的数据
+
+ALTER TABLE `db_name`.`tab_name` ADD INDEX `index_name` (`col_name`);   //新增索引
+
+ALTER TABLE `db_name`.`tab_name` ADD INDEX `index_name` (`id`, `name`);  //新增组合索引
+
+CREATE  TABLE  table1  LIKE  table2;     //创建表table1复制表table2的结果
+
+INSERT  INTO  table1  SELECT  *  FROM  table2;        //往表table1插入表table2的数据
+
+CREATE TABLE newadmin AS ( SELECT username, password FROM admin );      //创建一个表复制另一个表的一些字段
+
+ 
+
+四、用户与用户权限管理
+
+1、赋予用户权限
+
+方法一：先创建用户再赋予权限：
+
+USE `mysql`;
+
+CREATE USER 'backend'@'%' IDENTIFIED BY 'Back123end'; //用户名backend，密码Back123end
+
+FLUSH PRIVILEGES;
+
+grant select,update,insert,delete,create,index,show databases on *.* to 'backend'@'%';  //第一个 * 符号代表所有数据库，第二个 * 符号代表所有数据表，backend表示数据库用户名。%符号代表所有主机
+
+GRANT CREATE, INSERT,SELECT,SHOWDATABASES,INDEX,ALTER,UPDATE ON `db_backend`.* TO 'backend’@'%';    //给任何主机上的backend用户赋予db_backend数据库所有表的对应权限。
+
+ 
+
+方法二：直接创建并赋予权限：
+
+Grant all privileges on *.*  to  'backend'@'%' identified by '123456' with grant option;
+
+ 
+
+2、查看mysql用户权限
+
+方法一：直接查询mysql数据库的user表；
+
+方法二： show grants for 你的用户;  或者  show grants for root@'localhost';
+
+ 
+
+3、移除一个用户的权限
+
+revoke insert,update,delete,alter,select ON *.* from 'xbb'@'localhost' IDENTIFIED BY '123';
+
+revoke alter on *.*  from ‘backend’@’%’;
+
+ 
+
+4、删除用户
+
+drop user username;
+
+ 
+
+5、更改mysql数据库root用户密码
+
+UPDATE mysql.user SET Password=PASSWORD('newpwd') WHERE user='root';
+
+FLUSH PRIVILEGES;
+
+
+
+五、数据的备份与恢复
+
+1.导出整个数据库(shell下使用)
+
+　　mysqldump -u 用户名 -p 数据库名 > 导出的文件名
+
+　　mysqldump -u root -p db_name > test.sql
+
+2.导出一个表(shell下使用)
+
+       mysqldump -uUSER -pPASSWORD --no-data DATABASE TABLE > table.sql     //导出表结构
+
+　　mysqldump -u 用户名 -p 数据库名 表名> 导出的文件名     //导出表结构和数据
+
+　　mysqldump -u root -p db_name table_name> test.sql      //导出表结构和数据
+
+3.导出一个数据库结构(shell下使用)
+
+　　mysqldump -u root -p -d –add-drop-table db_name > test.sql
+
+　　-d 没有数据 –add-drop-table 在每个create语句之前增加一个drop table
+
+4.导入数据库(mysql控制台)
+
+　　mysql>use 数据库
+
+　　mysql>source /home/pt/test.sql
+ 
+
+ 
+
+六、分区操作
+
+查看分区：SELECT PARTITION_NAME,TABLE_ROWS FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_NAME = 'table_name';
+
+删除分区：ALTER TABLE table_name DROP PARTITION p_name;
+
+FLUSH TABLE;
+
+ 
+
+七、其他
+
+1.Show 语句用法
+
+show tables或show tables from database_name; -- 显示当前数据库中所有表的名称。 
+2. show databases; -- 显示mysql中所有数据库的名称。 
+3. show columns from table_name from database_name; 或show columns from database_name.table_name; -- 显示表中列名称。 
+4. show grants for user_name; -- 显示一个用户的权限，显示结果类似于grant 命令。 
+5. show index from table_name; -- 显示表的索引。 
+6. show status; -- 显示一些系统特定资源的信息，例如，正在运行的线程数量。 
+7. show variables; -- 显示系统变量的名称和值。 
+8. show processlist; -- 显示系统中正在运行的所有进程，也就是当前正在执行的查询。大多数用户可以查看他们自己的进程，但是如果他们拥有process权限，就可以查看所有人的进程，包括密码。 
+9. show table status; -- 显示当前使用或者指定的database中的每个表的信息。信息包括表类型和表的最新更新时间。 
+10. show privileges; -- 显示服务器所支持的不同权限。 
+11. show create database database_name; -- 显示create database 语句是否能够创建指定的数据库。 
+12. show create table table_name; -- 显示创建表的语句。 
+13. show engines; -- 显示安装以后可用的存储引擎和默认引擎。 
+14. show innodb status; -- 显示innoDB存储引擎的状态。 
+15. show logs; -- 显示BDB存储引擎的日志。 
+16. show warnings; -- 显示最后一个执行的语句所产生的错误、警告和通知。 
+17. show errors; -- 只显示最后一个执行语句所产生的错误。 
+18. show [storage] engines; --显示安装后的可用存储引擎和默认引擎。
+
+2.Infobright相关
+
+将MySQL数据导出csv文件：
+
+SELECT * FROM `20170913_login` INTO OUTFILE '/mydata/csv/20170913_login.csv' FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n';
+导入cs文件到Infobright中：
+
+load data infile '/mydata/csv/20170913_login.csv' into table `login` fields terminated by ',' optionally enclosed by '"' lines terminated by '\n';
+
+ 
+
+3.语句技巧
+
+(1)查询时将时间戳格式化显示：
+
+SELECT  FROM_UNIXTIME(1234567890, '%Y-%m-%d %H:%i:%S')  FROM  table_name
+
+(2)最高效的删除重复记录方法 ( 因为使用了ROWID)例子：
+
+DELETE  FROM  EMP E  WHERE  E.ROWID > (SELECT MIN(X.ROWID) FROM  EMP X  WHERE  X.EMP_NO = E.EMP_NO);
+
+(3)列转行技巧：
+
+SELECT COUNT(CASE WHEN id=1 THEN 1 ELSE NULL END ) AS `one_num`,COUNT(CASE WHEN id=2 THEN 1 ELSE NULL END ) AS `two_num`,COUNT(CASE WHEN id=3 THEN 1 ELSE NULL END ) AS `tree_num` FROM test;
+
+//统计id为1的记录数，id为2的记录数以及id为3的记录数。
+
+表数据：
+
+
+
+执行该语句的结果：
+
+
+
+ 
+
+（4）查询一段时间内，每5分钟间隔在线分时数据统计(eventtime是时间戳)
+
+SELECT  FROM_UNIXTIME(`eventtime`-`eventtime`% (5*60), '%Y-%m-%d %H:%i:%S')  AS stime, count(distinct uid) uids
+
+FROM 20170828_online WHERE eventtime>=1503921000 AND eventtime<=1503925200
+
+GROUP BY stime;

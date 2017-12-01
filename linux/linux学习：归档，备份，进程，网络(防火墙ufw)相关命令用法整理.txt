@@ -1,0 +1,250 @@
+压缩
+
+tar 归档命令，不具备压缩功能
+tar -cf output.tar file1 file2 file3 folder1... 　　 #参数-c表示创建文件，-f表示指定文件。
+tar -cf output.tar *.txt 　　　　　　　　　　　   #归档所有.txt文件
+tar -rvf file.tar new_file.txt 　　　　　　　　　 #向归档文件file.tar追加一个文件。
+tar -tf file.tar 　　　　　　　　　　　　　　　　 #列出归档文件中的内容
+tar -xf file.tar 　　　　　　　　　　　　　　　　 #参数-x表示提取文件或文件夹。将内容提取到当前文件夹
+tar -xf file.tar -C /data/test 　　 #参数-c表示提取文件到指定目录
+tar -xvf file.tar file3 file6 　　　 #提取指定的几个文件，忽略其他文件
+tar -Af file.tar file2.tar 　　　　 #合并多个归档文件
+tar -tvf file.tar 　　　　　　　　 #查看合并归档文件是否成功
+tar -uvvf file.tar 　　　　　　    #查看归档文件中某个特定文件的时间戳
+tar -df file.tar file1 file2 ... 　　#比较归档文件中的文件与系统中的同名文件是否有差别。-d打印出差别。
+tar -f file.tar --delete file1 file2 ... 　　 　　	#使用--delete选项从归档文件中删除指定的文件
+tar --delete --file file.tar file1 file2 ...   　　#同上
+tar -cf file.tar * --exclude "*.txt" 　　 　　  #排除归档中所有.txt文件
+tar -cf file.tar * -X list.txt 　　　　　　　　 #排除归档中所有在list.txt中列出的文件。
+tar -cf file.tar * --exclude "*.txt" --totals   #选项--totals再归档完成后打印出总归档字节数
+tar -czvvf file.tar.gz file1 file2 ... 　　　　 #创建经由gzip压缩过的归档文件
+tar -cavvf file.tar.gz file1 file2 ... 　　　　 #同上
+
+gzip filename 　　　　 #压缩文件。删除原文件并生成filename.gz
+gzip -l test.txt.gz 　　 #列出压缩文件的属性信息
+gunzip filename.gz     #解压文件。删除filename.gz并生成filename.gz的未压缩形式
+
+zip file.zip file 　　　　 #压缩file文件，生成file.zip压缩文件，压缩完不会删除原文件
+zip -r file.zip folder file #对目录和文件进行递归操作
+zip file.zip -u newfile   #更新file.zip中的内容
+zip -d file.zip test.txt   #从压缩文件file.zip中删除文件test.txt
+unzip file.zip 　　　　   #解压缩文件，解压后不会删除原压缩文件
+unzip -l file.zip 　　　　 #只列出文件中的内容
+
+远程复制备份：
+rsync (ubuntu安装相关软件包：sudo apt-get install rsync)
+rsync -av source_path destination_path   #以递归方式将源目录复制到目的端，-a表示进行归档，-v表示在stdout打印细节信息及进度
+rsync -av source_path username@host:path   #将本地的目录递归赋值到远程主机上例如：rsync -av /data/test ubuntu@192.168.0.8:/home/backup
+rsync -avz source destination 　　　　  #参数-z表示在网络传输时使用数据压缩
+rsync -av /home/test/ /home/backups  #复制test目录中的内容到目的端
+rsync -av /home/test /home/backups  #在目的端创建backups目录并将源端/home/test目录复制到此目录中。
+rsync -av /home/test /home/backups/  #将源端/home/test 的内容复制到已有的目录backups中
+rsync -avz /home/code /mnt/backup/ --exclude "*.txt" 　　 #选项--exclude将不需要进行更新的文件排除掉
+rsync -avz /home/code /mnt/backup/ --exclude-from /data/filelist.txt 　　 #选项--exclude-from将文件filelist.txt中列出的文件排除掉。
+rsync -avz source destination --delete 　　 #选项--delete表示复制归档时，删除目的端那些在源端已经不存在的文件。
+rsync -Pa -I –size-only –delete –timeout=300 Remote_IP:/home/ubuntu /backup 　　 #使用ssh方式同步远程数据到本地目录
+
+scp:secure copy
+scp root@192.168.1.132:/data/log.zip /data/test  #通过ssh将远程文件拷贝回本地
+scp -r root@192.168.1.132:/data/test /data/test  #通过ssh将远程目录递归拷贝回本地/data/test目录
+scp /data/test.tar.gz ubuntu@192.168.1.75:/data/test  #通过ssh将本地文件拷贝到远程主机
+scp -P 4588 ubuntu@www.xxx.com:/data/test.sh /data/test  #选项-P指定端口将远程主机文件拷贝会本地
+其他参数选项：
+-1 强制scp命令使用协议ssh1 
+-2 强制scp命令使用协议ssh2 
+-4 强制scp命令只使用IPv4寻址 
+-6 强制scp命令只使用IPv6寻址 
+-B 使用批处理模式（传输过程中不询问传输口令或短语） 
+-C 允许压缩。（将-C标志传递给ssh，从而打开压缩功能） 
+-p 保留原文件的修改时间，访问时间和访问权限。 
+-q 不显示传输进度条。 
+-r 递归复制整个目录。 
+-v 详细方式显示输出。scp和ssh(1)会显示出整个过程的调试信息。这些信息用于调试连接，验证和配置问题。 
+-c cipher 以cipher将数据传输进行加密，这个选项将直接传递给ssh。 
+-F ssh_config 指定一个替代的ssh配置文件，此参数直接传递给ssh。 
+-i identity_file 从指定文件中读取传输时使用的密钥文件，此参数直接传递给ssh。 
+-l limit 限定用户所能使用的带宽，以Kbit/s为单位。 
+-o ssh_option 如果习惯于使用ssh_config(5)中的参数传递方式， 
+-P port 注意是大写的P, port是指定数据传输用到的端口号 
+-S program 指定加密传输时所使用的程序。此程序必须能够理解ssh(1)的选项。
+
+
+----------------------------------------------------------------
+定期远程自动增量备份脚本,使用crontab做自动执行
+#!/bin/bash
+find / -mtime 0 ! -type d > /tmp/backup_list 2> /dev/null #找出当天修改的非目录文件，结果重定向到/tmp/backup_list文件中
+cd /tmp
+filename=`data"+%F"` #得到当天日期并赋值给变量
+tar -T backup_list zcvf ${filename}.back.tar.gz #以给定文件名归档并压缩文件
+#将备份文件上传到远程服务器上
+ftp -n<<-ALIST
+open 192.168.12.12 6789
+user xst 123456
+binary #设定以二进制方式传输文件
+cd /home/xst/backup #进入远程服务器的备份目录
+lcd /tmp #进入当前计算机中的/tmp目录
+put *.back.tar.gz #推送到远程服务器
+bye
+ALIST
+rm -f ${filename}.back.tar.gz
+exit 0
+----------------------------------------------------------------
+
+ 
+
+进程：
+
+ps 　　　　#查看进程信息
+ps -A  　　#查看当前有哪些进程
+ps -f   　　#参数-f可以显示包含更多的列
+ps -e   　　#显示系统所有进程信息
+ps -ax 　　 #同上
+ps -ef 　　 #显示比较完整的进程信息。或者ps -ax或ps -axf
+ps -eo “%C : %p : %z : %a”|sort -k5 -nr  #按内存从大到小排列进程
+ps -eo “%C : %p : %z : %a”|sort -nr 　　 #按cpu利用率从大到小排列进程
+ps -eal | awk ‘{ if ($2 == “Z”) {print $4}}’ | sudo kill -9 　　 #清除僵死进程
+
+kill -l 　　　　　　 #打印出信号数和信号名称
+kill -s SIGNAL PID   #向指定进程发送信号，SIGNAL要么为信号数，要么为信号名称，如下：
+SIGHUP 1:对控制进程或终端进行挂起检测
+SIGINT 2：当按下Ctrl+C时发送该信号
+SIGKILL 9：用于强行杀死进程
+SIGTERM 15：默认用于终止进程
+SIGTSTP 20：当按下Ctrl+Z时发送该信号
+kill -s SIGKILL PID    #杀死PID对应的进程
+kill -9 PID 　　          #同上，杀死PID对应的进程
+killall -9 gedit 　　　 #通过进程名称杀死进程
+
+ 
+
+网络：
+
+top 　　   #查看内存，cpu，进程之间的状态。
+htop        #在top的基础上更好显示(执行sudo apt-get install htop安装)
+free 　　  #查看当前的内存使用情况
+pstree     #查看当前进程树
+lsof file    #查看哪个进程打开了文件file
+sudo lsof -i :22   #查看22端口现在运行什么程序
+sudo lsof -c vim  #查看vim进行现在打开的文件
+
+ifconfig ens33 | egrep -o "inet addr:[^ ]*" | grep -o "[0-9.]*" 　　 #提取本地ens33网卡的IP地址
+ifconfig ens33 hw ether 00:cc:bf:5a:aa:dd 　　 #设置MAC地址，在软件层面上进行硬件地址的欺骗
+ifconfig ens33 192.168.0.12 netmask 255.255.252.0 　　 #设置IP地址的子网掩码
+ifconfig ens33 192.168.0.12 　　 #设置网卡ens33的ip地址
+
+
+cat /etc/resolv.conf #查看DNS
+echo nameserver 8.8.8.8 >> /etc/resolve.conf 　　 #追加DNS：8.8.8.8到/etc/resolve.conf的DNS地址文件中。
+host google.com 　　 #列出域名所有的IP地址
+nslookup google.com 　　 #查询DNS相关的细节信息以及名字解析
+route 或 netstat -rn 或 sudo route -n 　　 #查看路由表信息
+ping ADDRESS 　　 #检查某个主机是否可以到达 ADDRESS可以是IP，域名和主机名 
+ping address -c 5     #选项-c 5表示限制发送的echo分组的数量为5,5次后自动停止发送
+
+arping IP 　　　　 #根据IP查网卡地址 
+nmblookup -A IP  #根据IP查电脑名
+arp -a | awk '{ print $4 }' 　　 #查看当前网卡的物理地址
+sudo ifconfig eth0:0 1.2.3.4 netmask 255.255.255.0 　　 #同一个网卡增加第二个IP地址
+echo 'blacklist ipv6' | sudo tee /etc/modprobe.d/blacklist-ipv6 　　 #屏蔽IPV6
+sudo netstat -atnp 　　 #察看当前网络连接状况以及程序
+whois test.com 　　  #查看域名的注册备案情况
+tracepath test.com   #查看到某一个域名的路由情况：
+
+netstat -ntlp | grep 9052   #查看哪些进程在监听9052端口
+netstat -na|grep :80|awk '{print $5}'|awk -F: '{print $1}'|sort|uniq -c|sort -r -n 　　 #统计80端口的连接并排序
+netstat -n | awk '/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}' 　　 #查看网络连接状态
+netstat -na|grep ESTABLISHED|awk '{print $5}'|awk -F: '{print $1}'|sort|uniq -c|sort -r -n 　　 #统计当前IP连接的个数
+
+sudo tcpdump -c 10000 -i eth0 -n dst port 80   #TCP抓包工具分析80端口数据流
+nc -zv localhost 1-65535 　　 #查看当前系统所有的监听端口
+w3m -dump_head http://www.xxx.com 　　 #查看HTTP头
+w3m -no-cookie -dump www.123cha.com|grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' 　　 #查看当前外网的IP地址
+sudo apt-get install rkhunter; rkhunter –checkall 　　 #检查本地是否存在安全隐患
+
+
+----------------------------------------------------------------------
+入侵报告工具 以auth.log文件为输入
+filename：check.sh
+
+#!/bin/bash
+AUTHLOG=/var/log/auth.log
+if [[ -n $1 ]];
+then
+AUTHLOG=$1
+echo Using Log file:$AUTHLOG
+fi
+LOG=/tmp/valid.$$.log
+grep -v "invalid" $AUTHLOG > $LOG
+users=$(grep "Failed password" $LOG | awk '{ print $(NF-5) }' | sort | uniq)
+printf "%-5s|%-10s|%-10s|%-13s|%-33s|%s\n" "Sr#" "User" "Attempts" "IP address" "Host_Mapping" "Time range"
+ucount=0;
+ip_list="$(egrep -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" $LOG | sort | uniq)"
+for ip in $ip_list;
+do
+grep $ip $LOG > /tmp/temp.$$.log
+for user in $users;
+do
+grep $user /tmp/temp.$$.log > /tmp/$$.log
+cut -c-16 /tmp/$$.log > $$.time
+tstart=$(head -1 $$.time);
+start=$(date -d "$tstart" "+%s");
+tend=$(tail -l $$.time);
+end=$(date -d "$tend" "+%s")
+limit=$(( $end - $start))
+if [ $limit -gt 120 ];
+then
+let ucount++;
+IP=$(egrep -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" /tmp/$$.log | head -1 );
+TIME_RANGE="$start-->$tend"
+ATTEMPTS=$(cat /tmp/$$.log|wc -l);
+HOST=$(host $IP | awk '{ print $NF }' )
+printf "%-5s|%-10s|%-10s|%-10s|%-33s|%-s\n" "$ucount" "$user" "$ATTEMPTS" "$IP" "$HOST" "$TIME_RANGE";
+fi
+done
+done
+rm /tmp/valid.$$.log /tmp/$$.log $$.time /tmp/temp.$$.log 2> /dev/null
+
+
+-------------------------------------------------------------------------------
+
+防火墙ufw
+
+sudo apt-get install ufw   #安装ufw防火墙
+sudo ufw enable              #启用 ufw防火墙，并在系统启动时自动开启
+
+sudo ufw disable   　　　　#关闭ufw防火墙
+
+sudo ufw status   　　　　#查看防火墙状态 
+
+sudo ufw default deny      　　　#关闭所有外部对本机的访问，但本机访问外部正常。
+sudo ufw allow|deny [service]   #开启/禁用 
+sudo ufw allow smtp　　　　　  #允许所有的外部IP访问本机的25/tcp (smtp)端口 
+sudo ufw allow 22/tcp 　　　　  #允许所有的外部IP访问本机的22/tcp (ssh)端口 
+sudo ufw allow 53 　　　　　　  #允许外部访问53端口(tcp/udp) 
+
+sudo ufw delete allow 53  　　 #禁用 53 端口
+sudo ufw allow from 192.168.1.12  　　　　#允许此IP访问所有的本机端口 
+
+sudo ufw delete allow from 192.168.1.12   #删除上一条的规则
+sudo ufw deny smtp 　　　　　　　　　　　#禁止外部访问smtp服务 
+sudo ufw delete allow smtp        　　　　   #删除上面建立的某条规则 
+
+sudo ufw allow proto udp 192.168.0.1 port 53 to 192.168.0.2 port 53 
+
+watch -n1 'ss | grep snpp'
+watch -n1 'ss | grep 172.16.3.180'
+netstat -lnt4 | awk '{print $4}'|cut -f2 -d: | grep -o '[0-9]*'
+
+gcc -g main2.c -o main2.out
+
+#gdb ./main2.out
+
+l
+start 开始调试
+p 打印
+n
+s  进入函数里面
+
+bt  进入函数堆栈
+
+f

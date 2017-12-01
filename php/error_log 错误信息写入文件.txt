@@ -1,0 +1,31 @@
+开发的时候，基本上都会把display_errors，error_reporting开启，有助于提高开发效率，上线后，基本上都会关掉页面报错信息，在把报错信息，放到文件中。
+
+一，php-fpm的error_log配置
+
+1，修改php.ini
+查看复制打印?
+
+    display_errors = Off    //改为off，页面访问时就不会出现报错信息了  
+
+2，修改php-fpm配置文件
+查看复制打印?
+
+    ;php_flag[display_errors] = off  
+    php_admin_value[error_log] = /var/log/php-fpm/www-error.log  
+    php_admin_flag[log_errors] = on  
+
+重启php-fpm，在这里要注意，php-fpm的配置会替换php.ini中的配置，display_errors也可以在php-fpm中配置。这样页面上就不会出现报错信息，报错信息被记录到了文件中。
+
+二，命令行下的error_log配置，修改php.ini
+查看复制打印?
+
+    display_errors = Off  
+    log_errors = On  
+    error_log = /var/log/cron/error.log  
+
+执行命令，例如：
+查看复制打印?
+
+    [root@network www]# php test.php    //test.php有语法错误  
+
+命令行下，是不调用php-fpm的配置的，所以我们只能修改php.ini的内容，修改后，不用重启php。执行命令后，错误信息，会被写到error.log文件中，这种情况适合crontab的php脚本。

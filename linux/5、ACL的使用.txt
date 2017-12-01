@@ -1,0 +1,61 @@
+#### setfacl命令可以用来细分linux下的文件权限。
+	chmod命令可以把文件权限分为u,g,o三个组，而setfacl可以对每一个文件或目录设置更精确的文件权限。
+	换句话说，setfacl可以更精确的控制权限的分配。
+
+		比如：让某一个用户对某一个文件具有某种权限。
+
+### 这种独立于传统的u,g,o的rwx权限之外的具体权限设置叫ACL（Access Control List）
+	ACL可以针对单一用户、单一文件或目录来进行r,w,x的权限控制，对于需要特殊权限的使用状况有一定帮助。
+
+		如，某一个文件，不让单一的某个用户访问。
+
+
+	setfacl 参数
+		-m：设置后续acl参数 
+		-x：删除后续acl参数  
+		-b：删除全部的acl参数
+		-k：删除默认的acl参数
+		-R：递归设置acl，包括子目录
+		-d：设置默认acl
+
+例子：在/mnt 下建立一个test文件   将权限改为777  并查看其ACL设置
+[root@yang ~]# cd /mnt
+[root@yang mnt]# touch test
+[root@yang mnt]# chmod 777 test 
+[root@yang mnt]# getfacl test 
+# file: test                                   //文件名
+# owner: root                            //文件所属者
+# group: root                             //文件所属组
+user::rwx                                    //文件所属者权限
+group::rwx                                 //同组用户权限
+other::rwx                                  /其它者权限
+
+
+现在我们让kiosk用户只有读取的权限
+
+[root@yang mnt]# setfacl -m u:kiosk:r test
+[root@yang mnt]# ll test 
+-rwxrwxrwx+ 1 root root 0 Feb  5 18:22 test        //权限的最后多了一个“+”
+[root@yang mnt]# getfacl test 
+# file: test
+# owner: root
+# group: root
+user::rwx
+user:kiosk:r--                                    //kiosk的权限为r
+group::rwx
+mask::rwx
+other::rwx
+
+
+
+除了对某个文件的单个用户进行权限设置外，还可以对某个组进行同样的设置：g:[用户组]:[rwx]
+
+还能对有效权限（mask）进行设置：有效权限(mask) 即用户或组所设置的权限必须要存在于mask的权限设置范围内才会生效
+              如上面的test文件，已经有了可读权限，如果我们把它的有效权限修改为只有写权限，则设置的ACL权限不在有效权限之内，
+              则用户kiosk就不可能再查看test文件中的内容了
+操作：  setfacl  -m  m:w    /mnt/test
+
+最后取消ACL权限：
+setfacl  -x u:kiosk  /mnt/test
+恢复有效权限：
+setfacl -x m /mnt/test

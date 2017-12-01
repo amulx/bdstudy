@@ -1,0 +1,37 @@
+Nginx 访问 html 文件正常，但是访问 php 文件空白，状态码 200，也没有错误日志信息，经过排查后是因为 Nginx 的 PHP、fastcgi 的配置问题。
+
+系统环境
+Linux CentOS7
+nginx/1.12.0
+PHP 7.1.6
+交代
+访问 html 文件正常
+访问 php 文件空白、状态码 200、无错误日志
+系统执行了 yum -y update
+进行了 HTTPS 部署
+出现问题的是新增的第二个站点，第一个站点未发生故障
+问题修复
+经过排查，是因为 Nginx 中的 PHP 配置。
+
+出错时的配置
+
+location ~ \.php$ {
+   fastcgi_pass   127.0.0.1:9000;
+   fastcgi_index  index.php;
+   fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+   include        fastcgi_params;
+}
+需要修改成的配置
+
+location ~ \.php$ {
+   fastcgi_pass   127.0.0.1:9000;
+   fastcgi_index  index.php;
+   include        fastcgi.conf;
+}
+修改的地方是两处
+
+去掉 fastcgi_param
+把 include 的 fastcgi_params 改为 fastcgi.conf
+重启 Nginx 后，一切正常了。
+
+fastcgi.conf 这样的一个配置增加在于硬编码的问题，有兴趣的可以 vimdiff fastcgi.conf fastcgi_params 看看两个文件的区别。

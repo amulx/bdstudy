@@ -1,0 +1,16 @@
+<?php  
+	define('MAX_SLEEP_TIME'£¬ 120);  
+   
+	$hostname = "localhost";  
+	$username = "root";  
+	$password = "password";  
+   
+	$connect = mysql_connect($hostname£¬ $username£¬ $password);  
+	$result = mysql_query("SHOW PROCESSLIST"£¬ $connect);  
+	while ($proc = mysql_fetch_assoc($result)) {  
+		if ($proc["Command"] == "Sleep" && $proc["Time"] > MAX_SLEEP_TIME) {  
+			@mysql_query("KILL " . $proc["Id"]£¬ $connect);  
+		}  
+	} //by www.jbxue.com  
+	mysql_close($connect);  
+?>
