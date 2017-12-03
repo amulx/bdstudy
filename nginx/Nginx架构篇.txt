@@ -1,0 +1,96 @@
+一、nginx常见问题
+    nginx -s reload -c /Data/apps/nginx/conf/nginx.conf
+    1、相同server_name 多个虚拟主机优先级访问
+    server {
+        listen 80;
+        server_name testserver1 jeson.t.imooc.io;
+        location {
+            -
+        }
+    }    
+    server {
+        listen 80;
+        server_name testserver2 jeson.t.imooc.io;
+        location {
+            -
+        }
+    }    
+
+    2、localtin匹配优先级
+        =  进行普通字符精确匹配，也就是完全匹配   //优先级最高
+        ^~ 表示普通字符匹配，使用前缀匹配      //优先级较高
+        ~ \~* 表示执行一个正则匹配()  //~不区分大小写  ~* 区分大小写  //优先级较低
+
+        location = /code1/ { //精确匹配  匹配code1  http://www.amu.com/code1/
+            rewrite ^(.*)$ /code1/index.html break;
+        }
+
+        location ~ /code.* {  //正则匹配
+            rewrite ^(.*)$ /code3/index.html break;
+        }
+
+        location ^~ /code { //开头匹配  以code开头
+            rewrite ^(.*)$ /code2/index.html break;
+        }
+
+        error_page 500 502 503 504 404 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+
+
+    3、Nginx的try_files的使用
+        按顺序检查文件是否存在
+        location / {
+            try_files $uri $uri/ index.php;
+        }
+
+        location / {
+            root /opt/app/code/cache;
+            try_files $uri @java_page;
+        }
+
+        location @java_page{
+            proxy_pass http://127.0.0.1:9090;
+        }
+
+    4、Nginx的alias和root区别
+        location /request_path/image/ {
+            root /local_path/image/;
+        }
+        http://www.imooc.com/request_path/image/cat.png  ==> request_path/image/
+
+        location /request_path/image/ {
+            alias /local_path/image/;
+        }
+        http://www.imooc.com/request_path/image/cat.png   ==>  cat.png  
+
+    5、用什么样的方法传递用户的真是IP地址
+        set x_real_ip = $remote_addr
+
+    6、其他
+        Nginx：413 Request Entity Too Large
+        1、用户上传文件限制  client_max_body_size
+
+        502 bad gateway
+        2、后端服务无响应
+
+        504 Gateway Time-out
+        3、后端服务执行超时   
+
+二、Nginx性能优化
+    1、性能优化考虑点
+        （1）、当前系统结构瓶颈
+            观察指标、压力测试
+        （2）、了解业务模式
+            接口业务类型、系统层次化结构
+        （3）、性能与安全
+
+    2、压测工具ab
+        （1）、安装
+            yum install httpd-tools
+        （2）、使用
+            ab -n 2000 -c 2 http://127.0.0.1   
+            // -n==>总共的请求次数   -c==>并发  -k 是否开启长连接
+
+    3、系统与Nginx优化

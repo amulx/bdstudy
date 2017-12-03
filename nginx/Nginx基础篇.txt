@@ -1,0 +1,113 @@
+1、http请求
+    request 包括请求行、请求头部、请求数据
+    response 包括状态行、消息报头、响应正文
+
+    curl -v http://www.imooc.com > /dev/null
+
+2、Nginx日志类型
+    包括：error.log 、access_log
+    log_format
+        Syntax:log_format name
+3、Nginx变量
+    http请求变量：arg_PARAMETER、http_HEADER、sent_http_HEADER
+
+四、Nginx模块讲解
+    1、http_stub_module配置
+        server {
+            location /mystatus {
+                stub_status;
+            }
+        }
+        访问127.0.0.1/mystatus
+    2、http_random_index_module 目录中选择一个随机的主页
+        locatiion / {
+            root /opt/app/code;
+            random_index on;
+        }
+    3、http_sub_module  http内容替换
+        locatiion / {
+            root /opt/app/code;
+            index index.html index.htm;
+            sub_filter '<a>imooc' '<a>IMOOC';
+            #sub_filter_once off;
+        }  
+八、Nginx的请求限制
+        连接频率限制 - limit_conn_module
+        请求频率限制 - 
+        http {
+            limit_conn_zone $binanry_remotte_addr zone=conn_zone:1m;
+            limit_req_zone $binary_remmote_addr zone=req_zone:1m rate=1r/s;//限制1秒一个连接
+            server {
+                location / {
+                    root /opt/app/code;
+                    #limit_conn conn_zone 1;  //同一个时刻只允许一个ip来进行请求
+                    #limit_req zone=req_zone burst=3 nodelay;// 最大为3 ，超过3个就留到下一秒响应
+                    #limit_req zone=req_zone burst=3;
+                    #limit_req zone=req_zone;
+                    #index index.html index.htm;
+                }
+            }
+        }
+        ab -n 50 -c 20 http://127.0.0.1/1.html
+九、Nginx的访问控制
+    基于IP的访问控制 - http_access_module
+    基于用户的信任登录 - http_auth_basic_module
+
+    1、http_access_module
+        Syntax:allow address | CIDR | unix: | all;
+        Default:-
+        Context:http,server,location,limit_except
+
+        Syntax:deny address | CIDR | unix: | all;
+        Default:-
+        Context:http,server,location,limit_except
+
+        location ~ ^/admin.html {
+            root /opt/app/code;
+            deny 222.128.189.17;
+            allow all;
+            index index.html index.htm;
+        }
+
+        location ~ ^/admin.html {
+            root /opt/app/code;
+            allow 222.128.189.17;
+            deny all;
+            index index.html index.htm;
+        }
+
+        location ~ ^/admin.html {
+            root /opt/app/code;
+            allow 222.128.189.0/24;
+            deny all;
+            index index.html index.htm;
+        }        
+
+        //remote_addr = IP2
+
+        3、http_x_forwared_for
+            http_x_forwareded_for = Client IP,Proxy(1) IP,Proxy(2) IP
+
+        4、http_access_module局限性
+            方法一、采用别的http头信息控制访问
+            方法二、结合GEO模块作
+            方法三、通过http变量传递
+
+        1、http_auth_basec_module
+            rpm -qf /usr/bin/htpasswd
+            yum install httpd-tools -y
+
+            htpasswd -c ./auth_conf 用户名    //  接着输入密码
+
+            location ~ ^/admin.html {
+                root /opt/app/code;
+                auth_basic "Auth access test! input your passward";
+                auth_basic_user_file /etc/nginx/auth_conf;
+                index index .html index.htm;
+            }
+
+            2、http_auth_basec_module 局限性
+                一、用户信息依赖文件方式
+                二、操作管理机械，效率低下
+                解决方案：Nginx结合lua实现高效验证
+                Nginx和LDAP打通，利用nginx_auth_ldap模块
