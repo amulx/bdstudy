@@ -38,6 +38,11 @@ char * show_site()
 ```
 gcc -g -O0 -fPIC -shared -o hello.so ./hello.c ./hello.h
 ```
+或者
+```
+gcc -O -c -fPIC -o hello.o hello.c
+gcc -shared -o libhello.so hello.o
+```
 
 * 编写测试用例,新建test.c
 
@@ -50,10 +55,41 @@ void main(){
 }
 ```
 
-* 依赖编译,测试
+* 依赖编译,测试,并运行生成的可执行文件进行测试
 
 ```
 gcc -o test test.c -L. -lhello
+./test
+```
+或
+
 ```
 
+
+```
+
+* 将编译生成的.so文件放到系统中
+
+```
+echo /usr/local/lib > /etc/ld.so.conf.d/local.conf
+cp libhello.so /usr/local/lib
+/sbin/ldconfig
+```
 #### PHP扩展开发
+
+* 生成扩展模块
+`./ext_skel --extname=bdipset`
+
+* 修改config.m4
+
+* 修改xxx.h
+
+* 编译参数
+
+```
+./configure --with-php-config=/Data/apps/php/bin/php-config
+make LDFLAGS=-lwhhipset
+make install
+```
+
+* 重启服务 
