@@ -111,3 +111,19 @@
                 二、操作管理机械，效率低下
                 解决方案：Nginx结合lua实现高效验证
                 Nginx和LDAP打通，利用nginx_auth_ldap模块
+                
+                
+1、http_access_module
+	Syntax: allow address | CIRD  //http://tengine.taobao.org/nginx_docs/cn/docs/http/ngx_http_access_module.html
+
+	http_x_forwarded_for
+
+2、http_auth_basic_module
+
+	rpm -qf /usr/bin/htpassed
+	yum install https-tools -y
+	htpasswd -c ./auth_conf jeson  //生产用户名密码
+
+3、http_auth_basic_module局限性
+	Nginx结合LUA实现高效验证
+	Nginx和LDAP打通，利用nginx-auth-ldap                
