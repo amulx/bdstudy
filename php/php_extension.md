@@ -77,12 +77,57 @@ cp libhello.so /usr/local/lib
 ```
 #### PHP扩展开发
 
+* 编写amu.def
+
+```
+string amua(string message)
+string amub(string type,string name,string ip)
+
+```
+
 * 生成扩展模块
-`./ext_skel --extname=bdipset`
+`./ext_skel --extname=amu --proto=amu.def --no-help
 
 * 修改config.m4
 
+```
+##指定PHP模块的工作方式，动态编译选项，如果想通过.so的方式接入扩展，请去掉前面的dnl注释
+PHP_ARG_WITH(helloworld, for helloworld support,
+Make sure that the comment is aligned:
+[  --with-helloworld             Include helloworld support])
+
+dnl Otherwise use enable:
+
+##指定PHP模块的工作方式，静态编译选项，如果想通过enable的方式来启用，去掉dnl注释
+PHP_ARG_ENABLE(helloworld, whether to enable helloworld support,
+Make sure that the comment is aligned:
+[  --enable-helloworld           Enable helloworld support])
+```
 * 修改xxx.h
+```
+PHP_FUNCTION(amub)
+{
+        char *type = NULL;
+        char *name = NULL;
+        char *ip = NULL;
+        /*      char *result  = NULL;*/
+        zend_string *result;
+        int argc = ZEND_NUM_ARGS();
+        size_t type_len;
+        size_t name_len;
+        size_t ip_len;
+    
+
+        if (zend_parse_parameters(argc, "sss", &type, &type_len, &name, &name_len, &ip, &ip_len) == FAILURE) 
+                RETURN_FALSE;
+
+        result = strpprintf(0, "ipset %s %s %s", type, name,ip);
+        RETURN_STR(result);    
+        RETURN_TRUE;
+        php_error(E_WARNING, "amub: not yet implemented");
+}
+
+```
 
 * 编译参数
 
