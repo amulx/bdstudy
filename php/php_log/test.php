@@ -1,3 +1,5 @@
+1\首先安装谷歌扩展
+2\调用事例如下
 <?php
 include 'AmuLog.php';
 include 'ChromePhp.php';
