@@ -192,3 +192,19 @@ d)  Suricata命令行
 |--pcap[=]   | run in pcap mode, no value select interfaces from suricata.yaml|
 |--pcap-buffer-size | size of the pcap buffer value from 0 - 初始化中MAX值|
 |--erf-in   |  process an ERF file|
+
+
+
+
+------
+
+#### suricata中redis的配置部分
+```
+      redis:
+        server: 127.0.0.1
+        port: 6379
+        mode: channel
+        pipelining:
+          enabled: yes ## set enable to yes to enable query pipelining
+          batch-size: 1000 ## number of entry to keep in buffer
+```
