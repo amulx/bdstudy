@@ -1,0 +1,174 @@
+[TOC]
+
+###什么是strace
+strace是Linux环境下的一款程序调试工具，用来监察一个应用程序所使用的系统调用。
+Strace是一个简单的跟踪系统调用执行的工具。在其最简单的形式中，它可以从开始到结束跟踪二进制的执行，并在进程的生命周期中输出一行具有系统调用名称，每个系统调用的参数和返回值的文本行。
+>在Linux中，进程是不能直接去访问硬件设备的，比如读取磁盘文件、接收网络数据等，但可以将用户态模式切换到内核模式，通过系统调用来访问硬件设备。这时strace就可以跟踪到一个进程产生的系统调用，包括参数，返回值，执行消耗的时间、调用次数，成功和失败的次数。
+
+###strace能做什么
+- 它可以基于特定的系统调用或系统调用组进行过滤
+- 它可以通过统计特定系统调用的使用次数，所花费的时间，以及成功和错误的数量来分析系统调用的使用。
+- 它跟踪发送到进程的信号。
+- 可以通过pid附加到任何正在运行的进程。
+- 调试性能问题，查看系统调用的频率，找出耗时的程序段
+- 查看程序读取的是哪些文件从而定位比如配置文件加载错误问题
+- 查看某个php脚本长时间运行“假死”情况
+- 当程序出现“Out of memory”时被系统发出的SIGKILL信息所kill
+另外因为strace拿到的是系统调用相关信息，一般也即是IO操作信息，这个对于排查比如cpu占用100%问题是无能为力的。这个时候就可以使用GDB工具了。
+
+phptrace
+因为strace只能追踪到系统调用信息，而拿不到php代码层的调用信息。phptrace扩展就是为了解决这个问题，phptrace包含两个功能：1. 打印当前PHP调用栈，2. 实时追踪PHP调用。这样就能更方便我们去查看到我们需要的信息。phptrace wiki
+### strace的使用
+
+#### 1、找出程序在启动时读取的配置文件
+```
+[root@localhost ~]# strace php 2>&1 | grep php.ini
+open("/Data/apps/php7/bin/php.ini", O_RDONLY) = -1 ENOENT (No such file or directory)
+open("/Data/apps/php7/etc/php.ini", O_RDONLY) = 3
+```
+
+#### 2、使用strace来跟踪cat查看一个文件做了什么
+```
+[root@localhost mau]# strace cat index.php
+execve("/usr/bin/cat", ["cat", "index.php"], [/* 27 vars */]) = 0
+brk(0)                                  = 0x60d000
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7ffff7ff9000
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=106900, ...}) = 0
+mmap(NULL, 106900, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7ffff7fde000
+close(3)                                = 0
+open("/usr/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\34\2\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=2107768, ...}) = 0
+mmap(NULL, 3932736, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7ffff7a1b000
+mprotect(0x7ffff7bd1000, 2097152, PROT_NONE) = 0
+mmap(0x7ffff7dd1000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b6000) = 0x7ffff7dd1000
+mmap(0x7ffff7dd7000, 16960, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7ffff7dd7000
+close(3)                                = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7ffff7fdd000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7ffff7fdb000
+arch_prctl(ARCH_SET_FS, 0x7ffff7fdb740) = 0
+mprotect(0x7ffff7dd1000, 16384, PROT_READ) = 0
+mprotect(0x60b000, 4096, PROT_READ)     = 0
+mprotect(0x7ffff7ffc000, 4096, PROT_READ) = 0
+munmap(0x7ffff7fde000, 106900)          = 0
+brk(0)                                  = 0x60d000
+brk(0x62e000)                           = 0x62e000
+brk(0)                                  = 0x62e000
+open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=106065056, ...}) = 0
+mmap(NULL, 106065056, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7ffff14f4000
+close(3)                                = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 3), ...}) = 0
+open("index.php", O_RDONLY)             = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=17, ...}) = 0
+fadvise64(3, 0, 0, POSIX_FADV_SEQUENTIAL) = 0
+read(3, "<?php\nphpinfo();\n", 65536)   = 17
+write(1, "<?php\nphpinfo();\n", 17<?php
+phpinfo();
+)     = 17
+read(3, "", 65536)                      = 0
+close(3)                                = 0
+close(1)                                = 0
+close(2)                                = 0
+exit_group(0)                           = ?
++++ exited with 0 +++
+```
+跟踪read函数
+```
+[root@localhost mau]# strace -e read cat index.php
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\34\2\0\0\0\0\0"..., 832) = 832
+read(3, "<?php\nphpinfo();\n", 65536)   = 17
+<?php
+phpinfo();
+read(3, "", 65536)                      = 0
++++ exited with 0 +++
+```
+
+统计每一系统调用的所执行的时间,次数和出错的次数
+```
+[root@localhost mau]# strace -c cat index.php
+<?php
+phpinfo();
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 22.22    0.000016           2         8           mmap
+ 15.28    0.000011           3         4           open
+ 12.50    0.000009           2         4           mprotect
+  9.72    0.000007           7         1           write
+  9.72    0.000007           1         6           close
+  6.94    0.000005           1         5           fstat
+  6.94    0.000005           5         1           munmap
+  5.56    0.000004           1         3           read
+  4.17    0.000003           1         4           brk
+  2.78    0.000002           2         1         1 access
+  2.78    0.000002           2         1           fadvise64
+  1.39    0.000001           1         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000072                    40         1 total
+```
+显示每一调用所耗的时间
+```
+[root@localhost mau]# strace -T cat index.php 2>&1|grep read
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\34\2\0\0\0\0\0"..., 832) = 832 <0.000007>
+read(3, "<?php\nphpinfo();\n", 65536)   = 17 <0.000009>
+read(3, "", 65536)                      = 0 <0.000007>
+```
+
+#### 3、为什么这个程序不能打开我的文件？
+当我们开发了一个PHP扩展，可以PHP为什么加载不到我们的扩展文件,通过命令：
+```
+[root@localhost mau]# strace -e open php 2>&1 | grep phpfuns
+```
+在输出的结果中查找失败的open（）或access（）系统调用，很有可能是因为权限问题导致的。
+
+#### 4、查看程序在干什么
+```
+[root@localhost system]# strace -p $pid
+Process 3625 attached
+futex(0x13517c4, FUTEX_WAIT_PRIVATE, 527904, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+futex(0x13517c4, FUTEX_WAIT_PRIVATE, 527912, NULL) = 0
+futex(0x134e7e0, FUTEX_WAKE_PRIVATE, 1) = 0
+setsockopt(39, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+sendto(39, "J\0\0\0\n5.6.30\0\35\7\4\0j;'O<{xh\0\377\367\10\2\0\177\200"..., 78, MSG_DONTWAIT, NULL, 0) = 78
+recvfrom(39, "\263\0\0\1", 4, MSG_DONTWAIT, NULL, NULL) = 4
+recvfrom(39, "\215\242?\0\0\0\0@\10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 179, MSG_DONTWAIT, NULL, NULL) = 179
+access("./db_firewall_log", F_OK)       = 0
+open("./db_firewall_log/db.opt", O_RDONLY) = -1 ENOENT (No such file or directory)
+sendto(39, "\7\0\0\2\0\0\0\2\0\0\0", 11, MSG_DONTWAIT, NULL, 0) = 11
+recvfrom(39, "\17\0\0\0", 4, MSG_DONTWAIT, NULL, NULL) = 4
+recvfrom(39, "\3SET NAMES utf8", 15, MSG_DONTWAIT, NULL, NULL) = 15
+sendto(39, "\7\0\0\1\0\0\0\2\0\0\0", 11, MSG_DONTWAIT, NULL, 0) = 11
+recvfrom(39, "\21\0\0\0", 4, MSG_DONTWAIT, NULL, NULL) = 4
+recvfrom(39, "\3set autocommit=0", 17, MSG_DONTWAIT, NULL, NULL) = 17
+
+```
+
+#### 5、为什么****不能连接到该服务器？
+
+```
+[root@localhost mau]# strace -e poll,select,connect,recvfrom,sendto ssh root@172.16.1.137
+connect(3, {sa_family=AF_LOCAL, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+connect(3, {sa_family=AF_LOCAL, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+poll([{fd=3, events=POLLIN}], 1, 10)    = 1 ([{fd=3, revents=POLLIN}])
+connect(3, {sa_family=AF_LOCAL, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+connect(3, {sa_family=AF_LOCAL, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+sendto(3, "\24\0\0\0\26\0\1\3\3537\365Z\0\0\0\0\0\0\0\0", 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+connect(4, {sa_family=AF_LOCAL, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+connect(3, {sa_family=AF_INET, sin_port=htons(22), sin_addr=inet_addr("172.16.1.137")}, 16) = -1 ETIMEDOUT (Connection timed out)
+ssh: connect to host 172.16.1.137 port 22: Connection timed out
++++ exited with 255 +++
+
+```
+
+### strace调试php
+```
+[root@localhost mau]# strace -ff -o strace.log -f -F -T /Data/apps/php7/sbin/php-fpm -c /Data/apps/php7/etc/php-fpm.conf
+[root@localhost mau]# ls
+strace.log.29705  strace.log.29708  strace.log.31394  strace.log.31502  strace.log.31589  strace.log.31682
+index.php         strace.log.29706  strace.log.29709  strace.log.31404  strace.log.31521  strace.log.31614
+strace.log.29704  strace.log.29707  strace.log.31336  strace.log.31445  strace.log.31562  strace.log.31640
+
+```
