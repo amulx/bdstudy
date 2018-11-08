@@ -1,0 +1,118 @@
+ grep -v "^$" /var/log/www.log.slow | cut -d " " -f 3,2 | sort | uniq -c | sort -k1,1nr | head -n 50
+
+
+
+     sort:  对单词进行排序
+     uniq -c:  显示唯一的行，并在每行行首加上本行在文件中出现的次数
+     sort -k1,1nr:  按照第一个字段，数值排序，且为逆序
+     head -10:  取前10行数据
+
+
+第一步：修改php-fpm运行方式为   socket
+	打开/Data/apps/php7/etc/php-fpm.d/www.conf文件，并将listen = 127.0.0.1:9000修改为listen = /tmp/php-cgi.sock
+	Socket是使用unix domain socket连接套接字/dev/shm/php-cgi.sock（很多教程使用路径/tmp，而路径/dev/shm是个tmpfs，速度比磁盘快得多）listen = /dev/shm/php-cgi.sock
+
+第二步：修改nginx配置文件
+	location ~ [^/]\.php(/|$) {
+    		#fastcgi_pass 127.0.0.1:9000;
+    		fastcgi_pass unix:/dev/shm/php-cgi.sock;
+    		fastcgi_index index.php;
+    		include fastcgi.conf;
+	}	
+
+第三步：重启fpm和nginx
+
+==================================================================================
+#测试php-fpm配置
+/usr/local/php/sbin/php-fpm -t
+/usr/local/php/sbin/php-fpm -c /chenamu/server/php/etc/php.ini -y /chenamu/server/php/etc/php-fpm.conf -t
+ 
+#启动php-fpm
+/usr/local/php/sbin/php-fpm
+/usr/local/php/sbin/php-fpm -c /chenamu/server/php/etc/php.ini -y /chenamu/server/php/etc/php-fpm.d/www.conf.1
+ 
+#关闭php-fpm
+kill -INT `cat /usr/local/php/var/run/php-fpm.pid`
+ 
+#重启php-fpm
+kill -USR2 `cat /usr/local/php/var/run/php-fpm.pid`
+/chenamu/server/php/etc/php-fpm.d/www.conf.1
+/chenamu/server/php/etc/php-fpm.d/www.conf
+==================================================================================
+
+加强优化
+第一步：修改php-fpm运行方式为   socket
+第二步：cp多个www.conf，并修改listen = /tmp/php-cgi.sock.1
+第三步：修改nginx的配置文件
+upstream phpbackend {
+	server unix:/tmp/php-cgi.sock weight=100 max_fails=10 fail_timeout=30;
+	server unix:/tmp/php-cgi.sock.1 weight=100 max_fails=10 fail_timeout=30;
+}
+
+server {
+	server_name 127.0.0.1;
+	listen 444; 
+	ssl on;
+	ssl_certificate /Data/apps/nginx/conf/33iq.crt;
+	ssl_certificate_key /Data/apps/nginx/conf/33iq_nopass.key;
+	ssl_protocols SSLv2 TLSv1;
+	ssl_ciphers ECDHE-RSA-AES256-SHA384:AES256-SHA256:HIGH:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!AESGCM;
+	client_max_body_size 512M;
+	add_header X-Frame-Options SAMEORIGIN;
+	charset utf-8;	
+	root   /Data/apps/wwwroot/firewall/apps/admin; 
+		index  index.html index.htm index.php;
+		location / {
+		index  index.htm index.html index.php;  
+			#访问路径的文件不存在则重写URL转交给ThinkPHP处理  
+			if (!-e $request_filename){
+				rewrite ^(.*)$ /index.php last;
+			}
+	}
+	
+	location ~ \.php(.*)$ {
+		#fastcgi_pass    127.0.0.1:9000;
+		fastcgi_pass    phpbackend;
+		#fastcgi_pass    unix:/tmp/php-cgi.sock;
+		fastcgi_index  index.php;
+		# fastcgi_split_path_info  ^((?U).+\.php)(/?.+)$;
+		fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+		fastcgi_param  PATH_INFO  $fastcgi_path_info;
+		# fastcgi_param  PATH_TRANSLATED  $document_root$fastcgi_path_info;
+		include        fastcgi_params;
+	}
+ }
+第四步：重启nginx和php-fpm（php-fpm启动时指定相应的配置文件）
+可以看到php-cgi.sock文件unix套接字类型
+ls -al /dev/shm
+
+
+查看php-cgi进程数：
+	ps -fe |grep "php-fpm"|grep "pool"|wc -l
+
+php-fpm进程平均暂用的内存：
+	ps --no-headers -o "rss,cmd" -C php-fpm | awk '{ sum+=$1 } END { printf ("%d%s\n", sum/NR/1024,"M") }'
+
+通过ps找出消耗内存的元凶：
+	ps -A --sort -rss -o comm,pmem,pcpu |uniq -c |head -15
+
+查看已经有多少个php-cgi进程用来处理tcp请求：
+	netstat -anp|grep "php-fpm"|grep "tcp"|grep "pool"|wc -l
+
+
+
+
+service php-fpm start 
+
+Starting php-fpm /alidata/server/php/sbin/php-fpm: error while loading shared libraries: libiconv.so.2: cannot open shared object file: No such file or directory
+
+出现这样的的错误
+
+1、先找libiconv.so.2 在哪里
+
+locate libiconv.so.2 
+
+找到了/root/sh/aliyun/libiconv-1.13.1/lib/.libs/libiconv.so.2
+
+2、复制libiconv.so.2放到/usr/local/lib下就可以了
+cp /root/sh/aliyun/libiconv-1.13.1/lib/.libs/libiconv.so.2 /usr/local/lib/libiconv.so.2
