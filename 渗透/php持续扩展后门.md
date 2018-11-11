@@ -82,7 +82,7 @@
   sayamu();
   ```
 
-  ![trigger_exec](/home/amu/桌面/memo/trigger_exec.png)
+  ![trigger_exec](images/trigger_exec.png)
 
 #### 全自动执行方式
 
