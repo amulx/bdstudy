@@ -163,7 +163,7 @@ pi@raspberrypi:~/code/composer $ cat composer.json
 
 * 搜索扩展包
 
-  ![扩展包](img\composer_ext_package.png)
+  ![扩展包](img/composer_ext_package.png)
 
 * 修改composer.json文件
 
